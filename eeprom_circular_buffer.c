@@ -65,6 +65,11 @@ static uint8_t ee_cb_get_write_index(struct ee_cb *self) {
     return current_index;
 }
 
+static uint8_t ee_cb_get_read_index(struct ee_cb *self) {
+    uint8_t write_index = ee_cb_get_write_index(self);
+    return ee_cb_get_previous_index(self, write_index);
+}
+
 static uint8_t ee_cb_get_next_status(struct ee_cb *self, uint8_t write_index) {
     uint8_t previous_index = ee_cb_get_previous_index(self, write_index);
     uint8_t *previous_status_address = ee_cb_get_status_address(self, previous_index);
@@ -87,8 +92,8 @@ int ee_cb_write(struct ee_cb *self, const uint8_t *data) {
     if (!self || !data) return -1;
     uint8_t write_index = ee_cb_get_write_index(self);
     /*write data*/
-    uint8_t *data_address = ee_cb_get_data_address(self, write_index);
-    self->writer(data_address, data, self->data_size);
+    uint8_t *write_address = ee_cb_get_data_address(self, write_index);
+    self->writer(write_address, data, self->data_size);
     /*write status*/
     uint8_t next_status = ee_cb_get_next_status(self, write_index);
     uint8_t *status_address = ee_cb_get_status_address(self, write_index);
@@ -98,12 +103,8 @@ int ee_cb_write(struct ee_cb *self, const uint8_t *data) {
 
 int ee_cb_read(struct ee_cb *self, uint8_t *data) {
     if (!self || !data) return -1;
-    int current_index = ee_cb_get_write_index(self);
-    current_index--;
-    if (current_index < 0) {
-        current_index = self->buffer_size - 1;
-    }
-    uint8_t *data_address = ee_cb_get_data_address(self, (uint8_t)current_index);
-    self->reader(data_address, data, self->data_size);
+    uint8_t read_index = ee_cb_get_read_index(self);
+    uint8_t *read_address = ee_cb_get_data_address(self, read_index);
+    self->reader(read_address, data, self->data_size);
     return 0;
 }
