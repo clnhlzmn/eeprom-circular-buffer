@@ -40,6 +40,17 @@ int main(void) {
         ee_cb_read(&cb, (uint8_t*)&my_data);
         assert(my_data == i);
     }
+    {
+        size_t buffer_size = 4;
+        size_t data_size = 1;
+        memset(ee_mem, 0xFF, BUFFER_SIZE);
+        assert(ee_cb_init(&cb, ee_mem, data_size, buffer_size, ee_write, ee_read) == 0);
+        for (uint8_t i = 0; i < 4; ++i) {
+            ee_cb_write(&cb, &i);
+        }
+        uint8_t expected[] = {0, 1, 2, 3, 0, 1, 2, 3};
+        assert(memcmp(ee_mem, expected, 8) == 0);
+    }
     printf("tests pass\r\n");
     return 0;
 }
