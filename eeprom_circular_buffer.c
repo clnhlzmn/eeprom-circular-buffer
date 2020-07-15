@@ -79,7 +79,7 @@ static uint8_t ee_cb_get_next_status(struct ee_cb *self, uint8_t write_index) {
 
 int ee_cb_init(struct ee_cb *self, uint8_t *base_address, size_t data_size, 
     size_t buffer_size, ee_cb_writer writer, ee_cb_reader reader) {
-    if (!writer || !reader || buffer_size > 255) return -1;
+    if (!writer || !reader || buffer_size > EE_CB_MAX_BUFFER_SIZE) return -1;
     self->writer = writer;
     self->reader = reader;
     self->base_address = base_address;

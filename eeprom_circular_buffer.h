@@ -1,6 +1,12 @@
 /*
  * eeprom_circular_buffer.h
  * An implementation of AVR101 app note
+ * Used to spread writes to eeprom over N
+ * locations to wear the eeprom more slowly.
+ * Use ee_cb_init to initialize a struct ee_cb
+ * with reader and writer functions, the size
+ * of data to be stored, and the number of eeprom
+ * locations to use for storage.
  *
  * Created: 7/14/2020 8:50:33 AM
  *  Author: Colin
@@ -12,6 +18,8 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+
+#define EE_CB_MAX_BUFFER_SIZE (255)
 
 /*Reader and writer function pointer types.
 Functions matching these prototypes will be used to write and read to and from the eeprom*/
@@ -34,7 +42,15 @@ struct ee_cb {
 
 /*initialize a struct ee_cb
 returns 0 on success and not zero otherwise
-struct ee_cb must be initialized successfully before using with the other functions here*/
+struct ee_cb must be initialized successfully before using with the other functions here
+\param self pointer to struct ee_cb
+\param base_address pointer to start of eeprom storage
+\param data_size size of data to read and write
+\param buffer_size number of eeprom locations to use
+\param writer pointer to eeprom writer function
+\param reader pointer to eeprom reader function
+\note ee_cb uses (data_size + 1) * buffer_size bytes of eeprom
+please ensure enough is available*/
 int ee_cb_init(struct ee_cb *self, uint8_t *base_address, size_t data_size, 
     size_t buffer_size, ee_cb_writer writer, ee_cb_reader reader);
 
