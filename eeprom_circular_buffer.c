@@ -33,25 +33,43 @@ static void ee_cb_write_byte(struct ee_cb* self, uint8_t* addr, uint8_t value) {
     self->writer(addr, &value, 1);
 }
 
-/*returns the current parameter index*/
+static uint8_t ee_cb_get_previous_index(struct ee_cb *self, uint8_t index) {
+    int previous_index = index - 1;
+    if (previous_index < 0) {
+        previous_index = self->buffer_size - 1;
+    }
+    return (uint8_t)previous_index;
+}
+
+static uint8_t ee_cb_get_next_index(struct ee_cb *self, uint8_t index) {
+    int next_index = index + 1;
+    if (next_index >= self->buffer_size) {
+        next_index = 0;
+    }
+    return (uint8_t)next_index;
+}
+
 static uint8_t ee_cb_get_write_index(struct ee_cb *self) {
-    uint8_t *current_address = ee_cb_get_status_base_address(self);
+    uint8_t current_index = 0;
     while (1) {
-        uint8_t *previous_address = current_address - 1;
-        if (previous_address < ee_cb_get_status_base_address(self)) {
-            previous_address = ee_cb_get_status_base_address(self) + self->buffer_size - 1;
-        }
+        uint8_t *current_address = ee_cb_get_status_address(self, current_index);
+        uint8_t previous_index = ee_cb_get_previous_index(self, current_index);
+        uint8_t *previous_address = ee_cb_get_status_address(self, previous_index);
         uint8_t status_at_addr = ee_cb_read_byte(self, current_address);
         uint8_t status_at_previous_addr = ee_cb_read_byte(self, previous_address);
         if ((uint8_t)(status_at_previous_addr + 1) != status_at_addr) {
             break;
         }
-        current_address++;
-        if (current_address >= ee_cb_get_status_base_address(self) + self->buffer_size) {
-            current_address = ee_cb_get_status_base_address(self);
-        }
+        current_index = ee_cb_get_next_index(self, current_index);
     }
-    return (uint8_t)(current_address - ee_cb_get_status_base_address(self));
+    return current_index;
+}
+
+static uint8_t ee_cb_get_next_status(struct ee_cb *self, uint8_t write_index) {
+    uint8_t previous_index = ee_cb_get_previous_index(self, write_index);
+    uint8_t *previous_status_address = ee_cb_get_status_address(self, previous_index);
+    uint8_t previous_status = ee_cb_read_byte(self, previous_status_address);
+    return previous_status + 1;
 }
 
 int ee_cb_init(struct ee_cb *self, uint8_t *base_address, size_t data_size, 
@@ -67,20 +85,14 @@ int ee_cb_init(struct ee_cb *self, uint8_t *base_address, size_t data_size,
 
 int ee_cb_write(struct ee_cb *self, const uint8_t *data) {
     if (!self || !data) return -1;
-    /*get the status index*/
     uint8_t write_index = ee_cb_get_write_index(self);
     /*write data*/
     uint8_t *data_address = ee_cb_get_data_address(self, write_index);
     self->writer(data_address, data, self->data_size);
     /*write status*/
-    int previous_index = write_index - 1;
-    if (previous_index < 0) {
-        previous_index = self->buffer_size - 1;
-    }
-    uint8_t next_status_value = 
-        ee_cb_read_byte(self, 
-            ee_cb_get_status_address(self, (uint8_t)previous_index)) + 1;
-    ee_cb_write_byte(self, ee_cb_get_status_address(self, write_index), next_status_value);
+    uint8_t next_status = ee_cb_get_next_status(self, write_index);
+    uint8_t *status_address = ee_cb_get_status_address(self, write_index);
+    ee_cb_write_byte(self, status_address, next_status);
     return 0;
 }
 
