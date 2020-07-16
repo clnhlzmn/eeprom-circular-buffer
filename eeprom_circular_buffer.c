@@ -49,15 +49,30 @@ static uint8_t ee_cb_get_next_index(struct ee_cb *self, uint8_t index) {
     return (uint8_t)next_index;
 }
 
+struct status_pair {
+    uint8_t previous;
+    uint8_t current;
+};
+
+static struct status_pair ee_cb_get_previous_and_current_status(
+    struct ee_cb *self, uint8_t current_index) {
+    uint8_t *current_address = ee_cb_get_status_address(self, current_index);
+    uint8_t previous_index = ee_cb_get_previous_index(self, current_index);
+    uint8_t *previous_address = ee_cb_get_status_address(self, previous_index);
+    uint8_t current_status = ee_cb_read_byte(self, current_address);
+    uint8_t previous_status = ee_cb_read_byte(self, previous_address);
+    return (struct status_pair) {
+        .previous = previous_status, 
+        .current = current_status
+    };
+}
+
 static uint8_t ee_cb_get_write_index(struct ee_cb *self) {
     uint8_t current_index = 0;
     while (1) {
-        uint8_t *current_address = ee_cb_get_status_address(self, current_index);
-        uint8_t previous_index = ee_cb_get_previous_index(self, current_index);
-        uint8_t *previous_address = ee_cb_get_status_address(self, previous_index);
-        uint8_t status_at_addr = ee_cb_read_byte(self, current_address);
-        uint8_t status_at_previous_addr = ee_cb_read_byte(self, previous_address);
-        if ((uint8_t)(status_at_previous_addr + 1) != status_at_addr) {
+        struct status_pair status = 
+            ee_cb_get_previous_and_current_status(self, current_index);
+        if ((uint8_t)(status.previous + 1) != status.current) {
             break;
         }
         current_index = ee_cb_get_next_index(self, current_index);

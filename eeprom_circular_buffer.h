@@ -1,12 +1,8 @@
 /*
  * eeprom_circular_buffer.h
- * An implementation of AVR101 app note
- * Used to spread writes to eeprom over N
+ * This is an implementation of Microchip app note AVR101.
+ * It is used to spread writes to eeprom over N
  * locations to wear the eeprom more slowly.
- * Use ee_cb_init to initialize a struct ee_cb
- * with reader and writer functions, the size
- * of data to be stored, and the number of eeprom
- * locations to use for storage.
  *
  * Created: 7/14/2020 8:50:33 AM
  *  Author: Colin
@@ -54,11 +50,14 @@ please ensure enough is available*/
 int ee_cb_init(struct ee_cb *self, uint8_t *base_address, size_t data_size, 
     size_t buffer_size, ee_cb_writer writer, ee_cb_reader reader);
 
-/*write the given parameter to the next position in the buffer*/
+/*ee_cb_write writes the given parameter to the next position in the buffer.
+The eeprom must be initialized (all bytes equal value) 
+before calling this function.*/
 int ee_cb_write(struct ee_cb *self, const uint8_t *data);
 
-/*read the currently stored parameter
-returns 0 if no parameter has been written*/
+/*ee_cb_read reads the currently stored data.
+If no parameter has been written the read data bytes will 
+be equal to whatever value the eeprom was initialized with.*/
 int ee_cb_read(struct ee_cb *self, uint8_t *data);
 
 #endif /* EEPROM_CIRCULAR_BUFFER_H_ */
