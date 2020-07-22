@@ -28,8 +28,10 @@ Use this function to initialize `struct ee_cb`.
     
 * params `reader` and `writer`
     
-    These are pointers to functions that implement the actual reading and writing of the eeprom. They should match the prototypes given by `ee_cb_reader` and `ee_cb_writer`. Please note that the behavior of `ee_cb_write` and `ee_cb_read` is undefined if the eeprom is not initialized such that all locations have the same value. This is typically performed during programming. For example: an AVR microcontroller eeprom gets all bytes initialized to `0xFF` after a chip erase.
+    These are pointers to functions that implement the actual reading and writing of the eeprom. They should match the prototypes given by `ee_cb_reader` and `ee_cb_writer`. 
 
 ## `ee_cb_read` and `ee_cb_write`
 
-After successful initialization (`ee_cb_init` returned 0) the functions `ee_cb_read` and `ee_cb_write` can be used to read and write `data_size` bytes.
+After successful initialization (`ee_cb_init` returned 0) the functions `ee_cb_read` and `ee_cb_write` can be used to read and write `data_size` bytes. 
+
+Please note that the behavior of `ee_cb_write` and `ee_cb_read` is undefined if the eeprom is not initialized such that all locations have the same value. This is typically performed during programming. For example: an AVR microcontroller eeprom gets all bytes initialized to `0xFF` after a chip erase.
