@@ -55,9 +55,11 @@ The eeprom must be initialized (all bytes equal value)
 before calling this function.*/
 int ee_cb_write(struct ee_cb *self, const uint8_t *data);
 
-/*ee_cb_read reads the currently stored data.
+/*
+ee_cb_read reads the currently stored data.
 If no parameter has been written the read data bytes will 
-be equal to whatever value the eeprom was initialized with.*/
+be equal to whatever value the eeprom was initialized with.
+data_size bytes will be written to the location pointed to by data*/
 int ee_cb_read(struct ee_cb *self, uint8_t *data);
 
 #endif /* EEPROM_CIRCULAR_BUFFER_H_ */
