@@ -8,7 +8,7 @@ This library implements a circular buffer for eeprom memory. The API exposes an 
 
 ## `struct ee_cb`
 
-* To use this library you must create an instance of `struct ee_cb` and initialize it with `ee_cb_init`
+To use this library you must create an instance of `struct ee_cb` and initialize it with `ee_cb_init`
 
 ## `ee_cb_init`
 
