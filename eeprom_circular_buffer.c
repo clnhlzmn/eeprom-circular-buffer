@@ -3,7 +3,7 @@
  *
  * Created: 7/14/2020 8:50:43 AM
  *  Author: Colin
- */ 
+ */
 
 #include "eeprom_circular_buffer.h"
 
@@ -62,7 +62,7 @@ static struct status_pair ee_cb_get_previous_and_current_status(
     uint8_t current_status = ee_cb_read_byte(self, current_address);
     uint8_t previous_status = ee_cb_read_byte(self, previous_address);
     return (struct status_pair) {
-        .previous = previous_status, 
+        .previous = previous_status,
         .current = current_status
     };
 }
@@ -70,7 +70,7 @@ static struct status_pair ee_cb_get_previous_and_current_status(
 static uint8_t ee_cb_get_write_index(struct ee_cb *self) {
     uint8_t current_index = 0;
     while (1) {
-        struct status_pair status = 
+        struct status_pair status =
             ee_cb_get_previous_and_current_status(self, current_index);
         if ((uint8_t)(status.previous + 1) != status.current) {
             break;
@@ -92,7 +92,7 @@ static uint8_t ee_cb_get_status_to_write(struct ee_cb *self, uint8_t write_index
     return previous_status + 1;
 }
 
-int ee_cb_init(struct ee_cb *self, uint8_t *base_address, size_t data_size, 
+int ee_cb_init(struct ee_cb *self, uint8_t *base_address, size_t data_size,
     size_t buffer_size, ee_cb_writer writer, ee_cb_reader reader) {
     if (!writer || !reader || buffer_size > EE_CB_MAX_BUFFER_SIZE) return -1;
     self->writer = writer;
@@ -120,6 +120,15 @@ int ee_cb_read(struct ee_cb *self, uint8_t *data) {
     if (!self || !data) return -1;
     uint8_t read_index = ee_cb_get_read_index(self);
     uint8_t *read_address = ee_cb_get_data_address(self, read_index);
+    self->reader(read_address, data, self->data_size);
+    return 0;
+}
+
+int ee_cb_read_previous(struct ee_cb *self, uint8_t *data) {
+    if (!self || !data) return -1;
+    uint8_t read_index = ee_cb_get_read_index(self);
+    uint8_t previous_index = ee_cb_get_previous_index(self, read_index);
+    uint8_t *read_address = ee_cb_get_data_address(self, previous_index);
     self->reader(read_address, data, self->data_size);
     return 0;
 }

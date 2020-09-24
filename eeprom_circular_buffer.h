@@ -6,7 +6,7 @@
  *
  * Created: 7/14/2020 8:50:33 AM
  *  Author: Colin
- */ 
+ */
 
 
 #ifndef EEPROM_CIRCULAR_BUFFER_H_
@@ -47,19 +47,26 @@ struct ee_cb must be initialized successfully before using with the other functi
 \param reader pointer to eeprom reader function
 \note ee_cb uses (data_size + 1) * buffer_size bytes of eeprom
 please ensure enough is available*/
-int ee_cb_init(struct ee_cb *self, uint8_t *base_address, size_t data_size, 
+int ee_cb_init(struct ee_cb *self, uint8_t *base_address, size_t data_size,
     size_t buffer_size, ee_cb_writer writer, ee_cb_reader reader);
 
 /*ee_cb_write writes the given parameter to the next position in the buffer.
-The eeprom must be initialized (all bytes equal value) 
+The eeprom must be initialized (all bytes equal value)
 before calling this function.*/
 int ee_cb_write(struct ee_cb *self, const uint8_t *data);
 
 /*
 ee_cb_read reads the currently stored data.
-If no parameter has been written the read data bytes will 
+If no parameter has been written the read data bytes will
 be equal to whatever value the eeprom was initialized with.
 data_size bytes will be written to the location pointed to by data*/
 int ee_cb_read(struct ee_cb *self, uint8_t *data);
+
+/*
+ee_cb_read_previous reads the data that was stored prior to the current data.
+If zero or one writes has been performed the read data bytes will
+be equal to whatever value the eeprom was initialized with.
+data_size bytes will be written to the location pointed to by data*/
+int ee_cb_read_previous(struct ee_cb *self, uint8_t *data);
 
 #endif /* EEPROM_CIRCULAR_BUFFER_H_ */

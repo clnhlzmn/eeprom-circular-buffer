@@ -51,6 +51,24 @@ int main(void) {
         uint8_t expected[] = {0, 1, 2, 3, 0, 1, 2, 3};
         assert(memcmp(ee_mem, expected, 8) == 0);
     }
+
+    memset(ee_mem, 0xff, MEM_SIZE);
+    my_data = 0x00;
+    ee_cb_read_previous(&cb, (uint8_t*)&my_data);
+    assert(my_data == 0xff);
+    my_data = 0x01;
+    ee_cb_write(&cb, (uint8_t*)&my_data);
+    ee_cb_read_previous(&cb, (uint8_t*)&my_data);
+    assert(my_data == 0xff);
+    my_data = 0x02;
+    ee_cb_write(&cb, (uint8_t*)&my_data);
+    ee_cb_read_previous(&cb, (uint8_t*)&my_data);
+    assert(my_data == 0x01);
+    my_data = 0x03;
+    ee_cb_write(&cb, (uint8_t*)&my_data);
+    ee_cb_read_previous(&cb, (uint8_t*)&my_data);
+    assert(my_data == 0x02);
+
     printf("tests pass\r\n");
     return 0;
 }
